@@ -31,7 +31,7 @@ This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) 
     * Location
     * Tech Stack / Skills (extracted via `aria-label`)
 
----
+
 
 ## 🔄 Process
 
@@ -45,7 +45,7 @@ This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) 
 4.  **Refinement (Filtering)**:
     * Implemented a Python-based filter to exclude unrelated listings (Sales, Web Devs) that appeared due to the platform's recommendation algorithm.
 
----
+
 
 ## 📚 What I Learned
 
@@ -54,7 +54,7 @@ This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) 
 * **DOM Manipulation**: Gained experience in selecting elements using `aria-label` and dealing with dynamic class names.
 * **Troubleshooting**: The importance of keeping failed attempts (`scout_old.py`) as a reference for future static scraping tasks.
 
----
+
 
 ## 🚀 How can it be improved
 
@@ -64,7 +64,7 @@ This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) 
 * **Exception Handling**: Add more robust error handling for network timeouts or changes in the website's HTML structure.
 * **Dynamic Keyword Search**: Allow users to input different job titles (e.g., via CLI arguments) instead of hardcoding "Data Engineer".
 
----
+
 ## 🏃‍♂️ How to Run
 
 ### 1. Clone the repository
@@ -96,4 +96,5 @@ python scout_old.py
 ---
 
 Author: Hyomin (9nu5)
+
 Status: Active 🟢
