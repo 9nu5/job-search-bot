@@ -4,7 +4,7 @@ A Python-based web scraper designed to extract "Data Engineer" job listings from
 
 This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) issues using **Selenium** to filter out advertisements and irrelevant listings, ensuring high-quality search results.
 
----
+
 
 ## 🛠 Technologies Used
 
@@ -14,7 +14,7 @@ This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) 
 * **Requests**: Used in the initial research phase (archived in `scout_old.py`).
 * **WebDriver Manager**: For automatic management of Chrome drivers.
 
----
+
 
 ## ✨ Features
 
