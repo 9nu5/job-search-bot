@@ -1,5 +1,7 @@
 # 🕵️‍♂️ Green Japan Job Scraper (Data Engineer Edition)
 
+> **Note:** Japanese version (日本語) is to be edited.
+
 A Python-based web scraper designed to extract "Data Engineer" job listings from Green Japan, one of the leading IT/Web recruitment platforms in Japan.
 
 This project overcomes strict anti-bot measures and Client-Side Rendering (CSR) issues using **Selenium** to filter out advertisements and irrelevant listings, ensuring high-quality search results.
