@@ -1,83 +1,122 @@
-import requests
+import time
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By  # Required to locate elements
+from selenium.webdriver.common.keys import Keys  # Required to press keys (like Enter)
+from webdriver_manager.chrome import ChromeDriverManager
+import re
 
 
-def scout_green():
-    url = "https://www.green-japan.com/search"
+def scout_green_selenium():
+    print("Starting Selenium!")
 
-    # Query Parameters
-    params = {"keyword": "データエンジニア"}
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    response = requests.get(url, params=params, headers=headers)
-    print(f"Request address : {response.url}")
+    # 1. Browser Configuration (GUI mode)
+    chrome_options = Options()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
 
-    if response.status_code == 200:
-        print("Connection Successful!")
-        print(f"response code : {response.status_code}")
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), options=chrome_options
+    )
 
-        soup = BeautifulSoup(response.text, "html.parser")
+    try:
+        # 2. Navigate to the main page
+        url = "https://www.green-japan.com"
+        print(f"🏃 Navigating to {url}...")
+        driver.get(url)
+        time.sleep(3)
 
-        # 1, 일단 모든 박스를 타겟으로
-        all_boxes = soup.find_all("div", class_=lambda x: x and "MuiBox-root" in x)
+        # 3. Locate search bar and type keyword 
+        print("🔍 Locating the search bar...")
+
+        # Use the input tag name="user_search[keyword]" identified earlier
+        search_box = driver.find_element(By.NAME, "user_search[keyword]")
+
+        print("✍️ Typing 'データエンジニア'...")
+        search_box.clear()  # Clear any existing text
+        search_box.send_keys("データエンジニア")  # Type the keyword
+        time.sleep(1)  # Wait for 1 second (mimic human behavior)
+        search_box.send_keys(Keys.RETURN)  # Press Enter
+
+        print("⏳ Waiting for results to load (5 seconds)...")
+        time.sleep(5)  # Wait for the page to load
+
+        # 4. Verify Results
+        print(f"📄 Current Page Title: {driver.title}")
+        print(f"📍 Current URL: {driver.current_url}")
+
+        if "search/result" in driver.current_url:
+            print("✅ Successfully entered the search result page! (Perfect!)")
+        else:
+            print("🚨 Still on the wrong page? (Please check the screen manually!)")
+
+        # 5. Data Extraction (Pass to BeautifulSoup)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+
+        company_links = soup.find_all(
+            "a", href=re.compile(r"^/company"), target="_blank"
+        )
         real_job_cards = []
+        seen_cards = set()
 
-        # 2. aria-label 이용하여 real_job_cards 솎아내기
-        for box in all_boxes:
-            job_type_tag = box.find(
-                # 2-1. find "募集職種" aria label
-                attrs={"aria-label": "募集職種"}
-            )
+        for link in company_links:
+            # Find parent container with 'MuiBox-root' class
+            card = link.find_parent(class_=lambda x: x and "MuiBox-root" in x)
+            if card and card not in seen_cards:
+                real_job_cards.append(card)
+                seen_cards.add(card)
 
-            # 2-2. job tag exists && 'データエンジニア' included
-            if job_type_tag:
-                full_text = job_type_tag.find_parent().text
+        print(f"📦 Scanned cards count: {len(real_job_cards)}")
 
-                if "データエンジニア" in full_text:
-                    real_job_cards.append(box)
-
-        print(f"job cards found : {len(real_job_cards)}")
-
-        # 3. extract data
+        match_count = 0
         for i, card in enumerate(real_job_cards):
-            print("\n----공고----")
 
-            # 3-1. title
+            def get_info(label):
+                target_tag = card.find(attrs={"aria-label": label})
+                if target_tag:
+                    return target_tag.get_text(strip=True)
+                return "-"
+
+            occupation = get_info("募集職種")  # Job Type
             title_tag = card.find("h2", class_=lambda x: x and "job-offer-name" in x)
-            title = title_tag.text.strip() if title_tag else "無題"
+            title = title_tag.text.strip() if title_tag else "Untitled"
 
-            # 3-2. Find company name in ".MuiTypography-subtitle2"
+            # Filtering logic
+            full_text = (occupation + title).lower()
+            if "data" not in full_text and "データ" not in full_text:
+                continue
+
+            match_count += 1
+            print(f"\n🎉 Found #{match_count}")
+
+            company = "-"
             try:
                 company = card.select(".MuiTypography-subtitle2")[0].text.strip()
             except:
-                company = "failed to retrieve company"
-
-            # 3-3. get info from aria-label
-            def get_info(label):
-                aria_label = card.find(attrs={""})
-                if aria_label:
-                    p_tag = aria_label.find("p")
-                    if p_tag:
-                        return p_tag.text.strip()
-                    else:
-                        return aria_label.text.strip()
-                else:
-                    return "-"
-
-            location = get_info("勤務地")
-            salary = get_info("想定年収")
-            languages = get_info("関連スキル")
+                company = "-"
 
             print(f"🏢 Company: {company}")
             print(f"📜 Title: {title}")
-            print(f"💰 Salary: {salary}")
-            print(f"📍 Location: {location}")
-            print(f"💻 Programming language: {languages}")
+            print(f"🔧 Occupation: {occupation}")
+            print(f"💰 Salary: {get_info('想定年収')}")
 
-    else:
-        print(f"Request failed : {response.status_code}")
+            if match_count >= 5:
+                break
+
+        if match_count == 0:
+            print("\n💨 No matches found. (Please check the browser screen!)")
+
+    except Exception as e:
+        print(f"❌ Error occurred: {e}")
+
+    finally:
+        print("\n👋 Closing browser in 30 seconds... (Check the results!)")
+        time.sleep(30)  # Extended time for manual inspection
+        driver.quit()  # Close the browser regardless of success or failure
 
 
 if __name__ == "__main__":
-    scout_green()
+    scout_green_selenium()
