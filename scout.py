@@ -1,8 +1,11 @@
 import time
+import random
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By  # Required to locate elements
 from selenium.webdriver.common.keys import Keys  # Required to press keys (like Enter)
 from webdriver_manager.chrome import ChromeDriverManager
@@ -17,6 +20,7 @@ def scout_green_selenium():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
+    # chrome_options.add_argument("--headless")
 
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=chrome_options
@@ -27,9 +31,9 @@ def scout_green_selenium():
         url = "https://www.green-japan.com"
         print(f"🏃 Navigating to {url}...")
         driver.get(url)
-        time.sleep(3)
+        WebDriverWait(driver, 10).until(EC.url_contains(url))
 
-        # 3. Locate search bar and type keyword 
+        # 3. Locate search bar and type keyword
         print("🔍 Locating the search bar...")
 
         # Use the input tag name="user_search[keyword]" identified earlier
@@ -38,18 +42,19 @@ def scout_green_selenium():
         print("✍️ Typing 'データエンジニア'...")
         search_box.clear()  # Clear any existing text
         search_box.send_keys("データエンジニア")  # Type the keyword
-        time.sleep(1)  # Wait for 1 second (mimic human behavior)
+        time.sleep(random.uniform(1, 3))  # Wait for 1 second (mimic human behavior)
         search_box.send_keys(Keys.RETURN)  # Press Enter
 
         print("⏳ Waiting for results to load (5 seconds)...")
-        time.sleep(5)  # Wait for the page to load
+        # WebDriverWait(driver, 10).until(EC.url_contains("/search/result"))  # Wait for the page to load
+        time.sleep(5)
 
         # 4. Verify Results
         print(f"📄 Current Page Title: {driver.title}")
         print(f"📍 Current URL: {driver.current_url}")
 
         if "search/result" in driver.current_url:
-            print("✅ Successfully entered the search result page! (Perfect!)")
+            print("✅ Successfully entered the search result page")
         else:
             print("🚨 Still on the wrong page? (Please check the screen manually!)")
 
