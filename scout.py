@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By  # Required to locate elements
 from selenium.webdriver.common.keys import Keys  # Required to press keys (like Enter)
 from webdriver_manager.chrome import ChromeDriverManager
 import re
+import json
 
 
 def scout_green_selenium():
@@ -77,6 +78,7 @@ def scout_green_selenium():
         print(f"📦 Scanned cards count: {len(real_job_cards)}")
 
         match_count = 0
+        jobs_list = []
         for i, card in enumerate(real_job_cards):
 
             def get_info(label):
@@ -107,9 +109,27 @@ def scout_green_selenium():
             print(f"📜 Title: {title}")
             print(f"🔧 Occupation: {occupation}")
             print(f"💰 Salary: {get_info('想定年収')}")
+            print(f"📍 Location: {get_info('勤務地')}")
+            print(f"⌨️ Language: {get_info('関連スキル')}")
+            print(f"🔗 Link: https://www.green-japan.com{link['href']}")
 
+            job_info = {
+                "Company": company,
+                "Title": title,
+                "Occupation": occupation,
+                "Salary": get_info("想定年収"),
+                "Location": get_info("勤務地"),
+                "Language": get_info("関連スキル"),
+                "Link": f"https://www.green-japan.com{link['href']}",
+            }
+            jobs_list.append(job_info)
             if match_count >= 5:
                 break
+
+        # save results to a JSON after the loop
+        if jobs_list:
+            with open("scout_green_jobs.json", "w", encoding="utf-8") as f:
+                json.dump(jobs_list, f, ensure_ascii=False, indent=4)
 
         if match_count == 0:
             print("\n💨 No matches found. (Please check the browser screen!)")

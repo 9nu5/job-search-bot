@@ -1,18 +1,17 @@
 services:
-  db:
-    image: postgres:15-alpine
-    
-    container_name: job_pipeline_db
-    
+  minio:
+    image: minio/minio:latest
+    container_name: job_pipeline_minio
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "5432:5432"
+      - "9000:9000" #service port
+      - "9001:9001" #console port
+    command: server /data --console-address ":9001"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - minio_data:/data
     restart: always
 
 volumes:
-  postgres_data:
+  minio_data:
