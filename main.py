@@ -3,6 +3,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from src.storage.minio_storage import MinioStorage
 
+os.makedirs("data", exist_ok=True)
+
 def main():
     load_dotenv()
     
@@ -14,14 +16,13 @@ def main():
     today=datetime.now().strftime("%Y_%m_%d")
     
     json_path= "data/scout_green_jobs.json"
-    parquet_path=f"data/{today}_green_jobs.parquet"
-    file_path=parquet_path
     object_name =f"data/raw_data/{today}_jobs.parquet"
     
     minio=MinioStorage(endpoint,access_key,secret_key)
     
-    minio.save_json_as_parquet(json_path,parquet_path)
-    minio.upload_file(bucket_name,object_name,file_path)
+    df = minio.load_json_to_df(json_path)
+    parquet_buffer, buffer_size = minio.convert_df_to_parquet_buffer(df)
+    minio.upload_buffer(parquet_buffer, buffer_size, object_name, bucket_name)
 
     print("むこ!!!")
 

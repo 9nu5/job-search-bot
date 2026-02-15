@@ -209,3 +209,4 @@ docker-compose.yml
 scout_green_jobs.json
 docker-compose.yml
 /data
+remove_bucket.py
