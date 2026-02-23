@@ -1,5 +1,6 @@
 import time
 import random
+from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -21,7 +22,7 @@ def scout_green_selenium():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
 
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=chrome_options
@@ -34,17 +35,16 @@ def scout_green_selenium():
         driver.get(url)
         WebDriverWait(driver, 10).until(EC.url_contains(url))
 
-        # 3. Locate search bar and type keyword
         print("🔍 Locating the search bar...")
 
         # Use the input tag name="user_search[keyword]" identified earlier
         search_box = driver.find_element(By.NAME, "user_search[keyword]")
 
         print("✍️ Typing 'データエンジニア'...")
-        search_box.clear()  # Clear any existing text
-        search_box.send_keys("データエンジニア")  # Type the keyword
+        search_box.clear()
+        search_box.send_keys("データエンジニア")
         time.sleep(random.uniform(1, 3))  # Wait for 1 second (mimic human behavior)
-        search_box.send_keys(Keys.RETURN)  # Press Enter
+        search_box.send_keys(Keys.RETURN)
 
         print("⏳ Waiting for results to load (5 seconds)...")
         # WebDriverWait(driver, 10).until(EC.url_contains("/search/result"))  # Wait for the page to load
@@ -110,7 +110,7 @@ def scout_green_selenium():
             print(f"🔧 Occupation: {occupation}")
             print(f"💰 Salary: {get_info('想定年収')}")
             print(f"📍 Location: {get_info('勤務地')}")
-            print(f"⌨️ Language: {get_info('関連スキル')}")
+            print(f"⌨️ Tech stack: {get_info('関連スキル')}")
             print(f"🔗 Link: https://www.green-japan.com{link['href']}")
 
             job_info = {
@@ -119,7 +119,7 @@ def scout_green_selenium():
                 "Occupation": occupation,
                 "Salary": get_info("想定年収"),
                 "Location": get_info("勤務地"),
-                "Language": get_info("関連スキル"),
+                "Tech stack": get_info("関連スキル"),
                 "Link": f"https://www.green-japan.com{link['href']}",
             }
             jobs_list.append(job_info)
@@ -128,7 +128,9 @@ def scout_green_selenium():
 
         # save results to a JSON after the loop
         if jobs_list:
-            with open("scout_green_jobs.json", "w", encoding="utf-8") as f:
+            today=datetime.now().strftime("%Y_%m_%d")
+            
+            with open(f"scout_green_jobs_{today}.json", "w", encoding="utf-8") as f:
                 json.dump(jobs_list, f, ensure_ascii=False, indent=4)
 
         if match_count == 0:
