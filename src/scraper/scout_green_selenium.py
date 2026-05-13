@@ -1,31 +1,37 @@
 import time
 import random
+import re
+import json
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By  # Required to locate elements
 from selenium.webdriver.common.keys import Keys  # Required to press keys (like Enter)
 from webdriver_manager.chrome import ChromeDriverManager
-import re
-import json
+
 
 
 def scout_green_selenium():
+    load_dotenv()
     print("Starting Selenium!")
 
     # 1. Browser Configuration (GUI mode)
-    chrome_options = Options()
+    chrome_options = ChromeOptions()
+    chrome_options.binary_location = os.getenv("BROWSER_LOCATION")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--headless")
 
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), options=chrome_options
+        service=ChromeService(ChromeDriverManager().install()), options=chrome_options
     )
 
     try:
@@ -129,8 +135,17 @@ def scout_green_selenium():
         # save results to a JSON after the loop
         if jobs_list:
             today=datetime.now().strftime("%Y_%m_%d")
+            raw_data_env = os.getenv("RAW_DATA_DIR", "./data/raw_data")
             
-            with open(f"scout_green_jobs_{today}.json", "w", encoding="utf-8") as f:
+            if raw_data_env:
+                raw_data_dir = Path(raw_data_env)
+            else:
+                raw_data_dir = Path(__file__).parent.parent.parent / "data" / "raw_data"
+
+            raw_data_dir.mkdir(parents=True, exist_ok=True)
+            output_path = raw_data_dir / f"scout_green_jobs_{today}.json"
+            
+            with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(jobs_list, f, ensure_ascii=False, indent=4)
 
         if match_count == 0:

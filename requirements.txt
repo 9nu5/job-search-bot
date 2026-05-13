@@ -7,6 +7,7 @@ botocore==1.42.46
 certifi==2025.11.12
 cffi==2.0.0
 charset-normalizer==3.4.4
+dotenv==0.9.9
 greenlet==3.3.1
 h11==0.16.0
 idna==3.11
